@@ -1,0 +1,22 @@
+[
+    {
+        "devicename": "LED",
+        "pin": 21,
+        "device_type": "output"
+    },
+    {
+        "devicename": "Yellow",
+        "pin": 16,
+        "device_type": "output"
+    },
+    {
+        "devicename": "Yellow 2",
+        "pin": 20,
+        "device_type": "output"
+    },
+    {
+        "devicename": "Gr\u00fcn",
+        "pin": 19,
+        "device_type": "output"
+    }
+]

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Display</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .device {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin: 10px;
+            padding: 20px;
+            width: calc(20% - 40px); /* 5 devices per row */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-self: start;
+        }
+        .device.button{
+            background-color: #1b1b1d;
+            border: 1px solid #2f3031;
+        }
+        .device:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .device:active {
+            opacity: 0.6;
+        }
+        @media (max-width: 1600px) {
+            .device {
+                width: calc(25% - 40px); /* 4 devices per row */
+            }
+        }
+        @media (max-width: 1200px) {
+            .device {
+                width: calc(33.33% - 40px); /* 3 devices per row */
+            }
+        }
+        @media (max-width: 800px) {
+            .device {
+                width: calc(50% - 40px); /* 2 devices per row */
+            }
+        }
+        @media (max-width: 600px) {
+            .device {
+                width: calc(100% - 40px); /* 1 device per row */
+            }
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .overlay-content {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .overlay-content input, .overlay-content select {
+            margin: 10px 0;
+            padding: 10px;
+            width: 80%;
+        }
+        .overlay-content button {
+            padding: 10px 20px;
+            margin: 10px;
+        }
+        .header {
+            position: relative;
+            background-color: #1e1e1e;
+            padding: 20px;
+            text-align: center;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+        }
+        .header .left {
+            float: left;
+            display: flex;
+            align-items: center;
+        }
+        .header .left h1 {
+            margin: 0;
+        }
+        .header .right {
+            float: right;
+        }
+        .message-container {
+            position: relative;
+            text-align: center;
+            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-height: 100px; /* Set this to the max content height */
+            transition: max-height 0.5s ease;
+            overflow: hidden; /* Ensure content is hidden when height is reduced */
+        }
+
+        .message-container.height-zero {
+            max-height: 0;
+        }
+        .message-container #message{
+            z-index: 1;
+            position: relative;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            width: fit-content;
+            transition: transform 0.5s ease, opacity 0.5s ease, margin 0.5s ease, padding 0.5s ease;
+        }
+        .message-container #message.move-up {
+            transform: translate(0%, -200px); /* Move up */
+            opacity: 0;
+        }
+        .message-container .success {
+            background-color: #4CAF5088;
+            border: #2eca33 1px solid;
+        }
+        .message-container .error {
+            background-color: #f4433688; 
+            border: #ff2a1b 1px solid;
+        }
+        p{
+            margin: 0;
+        }
+        .mini_led{
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            background-color: #121212;
+        }
+        .mini_led.on{
+            background-color: #1f67aa;
+            box-shadow: 0px 0px 50px 0px #1f67aaa8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="left">
+            <h1>Device Display</h1>
+        </div>
+        <div class="right">
+            <button onclick="openOverlay()">Add Device</button>
+        </div>
+    </div>
+
+    <div class="message-container" id="message-container">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div id="message" class="{{ category }}">
+                    {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    <div class="container">
+        {% for device in devices %}
+            {% if device.device_type == 'output' %}
+                <div class="device" onclick="window.location.href='{% if device.access_url%}/api{% endif %}/device/{{ device.pin }}{% if device.access_url%}?url={{device.access_url}}{% endif %}'">
+                    <p>{{ device.devicename }}</p>
+                    <div class="mini_led {% if device.state %}on{% endif %}"></div>
+                </div>
+            {% else %}
+                <div class="device button">
+                    <p>{{ device.devicename }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="overlay" id="overlay">
+        <div class="overlay-content">
+            <h2>Add Device</h2>
+            <form action="/add-device" method="post" onsubmit="return handleFormSubmit()">
+                <input type="text" name="deviceName" placeholder="Device Name" required>
+                <input type="number" name="pin" placeholder="PIN Number" required>
+                <select name="deviceType" required>
+                    <option value="" disabled selected>Select Device Type</option>
+                    <option value="output">Light</option>
+                    <option value="input">Switch</option>
+                </select>
+                <br>
+                <button type="submit">Confirm</button>
+                <button type="button" onclick="closeOverlay()">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function openOverlay() {
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function closeOverlay() {
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function handleFormSubmit() {
+            closeOverlay();
+            return true; // Allow form submission
+        }
+
+        function closeMessage() {
+            const messageContainer = document.getElementById('message');
+            document.getElementById('message-container').classList.add('height-zero');
+            if (messageContainer) {
+                messageContainer.classList.add('move-up');
+                setTimeout(function (){
+                    messageContainer.style.border = 'none';    
+                }, 500);
+            }
+        }
+
+        // Set the timeout to call closeMessage after 5 seconds (5000 milliseconds)
+        setTimeout(closeMessage, 5000);
+    </script>
+</body>
+</html>
