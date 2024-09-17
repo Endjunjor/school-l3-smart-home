@@ -1,3 +1,3 @@
-import led as LEDC
+import run_on_start as setup
 
-LEDC.set.led(20)
+print(setup.generate.token())
