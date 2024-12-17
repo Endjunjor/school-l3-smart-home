@@ -27,7 +27,7 @@ def get_device(pin):
 
     # Search for the device by pin
     for device in devices:
-        if device.get("pin") == pin:
+        if device['pin'] == pin:
             return device
 
     # If no device with the given pin was found

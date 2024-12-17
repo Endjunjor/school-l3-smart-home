@@ -103,6 +103,7 @@ def device_switch(pin):
 
 @app.route('/unset/<pin>/')
 def unset_pin(pin):
+    pin = int(pin)
     device = FA.get_device(pin)
     if device is None:
         return redirect(url_for('error'))
@@ -138,14 +139,6 @@ def add_device():
         flash(f'Error "{device_name}" are not created.', 'error')
 
     return redirect("/")
-
-@app.route('/remove/<pin>')
-def remove_device(pin):
-    pin = int(pin)
-    LEDC.clear_led(pin)
-    FA.remove_device(pin)
-    flash(f'Pin "{pin}" removed successfully.', 'success')
-    return redirect(url_for('home'))
 
 @app.route('/<all>')
 def catch(all = None):
