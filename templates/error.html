@@ -16,6 +16,11 @@
         width: 100vw;
         overflow: hidden;
     }
+    .container{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
     h1{
         font-size: 4rem;
     }
@@ -36,11 +41,21 @@
         text-align: center;
         margin: 1rem;
     }
+    button{
+        padding: 1rem 2rem;
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
 </style>
 <body>
     <div class="container">
         <h3>Error 404</h3>
         <h1>Page not found</h1>
+        <button onclick="window.location.href = '/';">Go back to dashboard</button>
     </div>
 </body>
 </html>

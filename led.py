@@ -20,12 +20,12 @@ def usable(pin):
 
 def setup_led(pin):
         
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(pin, GPIO.OUT)
-        return True
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(pin, GPIO.OUT)
+    return True
 
 def clear_led(pin):
-     GPIO.cleanup(pin)
+    GPIO.cleanup(pin)
 
 class get:
     def led(pin):

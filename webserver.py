@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for, render_template_string, flash, abort
 import led as LEDC
+import button as BTN
 import file_access as FA
 import requests
 import json
@@ -86,11 +87,17 @@ def device(pin):
     device = FA.get_device(pin)
     if device is None:
         return redirect(url_for('error'))
-    try:
-        device['state'] = LEDC.get.led(pin)
-    except:
-        device['state'] = False
-    return render_template('device.html', device=device)
+    
+    if device['device_type'] == 'output':
+        try:
+            device['state'] = LEDC.get.led(pin)
+        except:
+            device['state'] = False
+        return render_template('device.html', device=device)
+    
+    if device['device_type'] == 'input':
+        flash(f'Lol gibt keine Input sachen', 'success')
+        return redirect('/')
 
 @app.route('/switch/<pin>/')
 def device_switch(pin):
@@ -118,6 +125,7 @@ def add_device():
     device_name = request.form.get('deviceName')
     pin = int(request.form.get('pin'))
     device_type = request.form.get('deviceType')
+    print(FA.check_pin(pin))
     if FA.check_pin(pin) == False:
         FA.add_device(device_name, pin, device_type)
     else:
@@ -132,8 +140,12 @@ def add_device():
                 FA.remove(pin)
                 flash(f'Error by pin setup "{device_name}" are not created.', 'error')
         elif device_type == 'input':
-            LEDC.setup_button(pin)
-            pass
+            if BTN.setup_button(pin):
+                flash(f'Device "{device_name}" added successfully.', 'success')
+                pass
+            else:
+                FA.remove(pin)
+                flash(f'Error by pin setup "{device_name}" are not created.', 'error')
     except:
         FA.remove(pin)
         flash(f'Error "{device_name}" are not created.', 'error')

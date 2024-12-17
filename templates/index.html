@@ -195,7 +195,7 @@
                     <div class="mini_led {% if device.state %}on{% endif %}"></div>
                 </div>
             {% else %}
-                <div class="device button">
+                <div class="device button" onclick="window.location.href='/device/{{ device.pin }}'">
                     <p>{{ device.devicename }}</p>
                 </div>
             {% endif %}
@@ -210,7 +210,8 @@
                 <select name="deviceType" required>
                     <option value="" disabled selected>Select Device Type</option>
                     <option value="output">Light</option>
-                    <option value="input">Switch</option>
+                    <option value="input">Light Switch</option>
+                    <option value="virtual_input">Virtual Switch</option>
                 </select>
                 <br>
                 <button type="submit">Confirm</button>
