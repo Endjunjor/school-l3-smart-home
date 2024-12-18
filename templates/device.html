@@ -190,6 +190,10 @@
             {% endif %}
         </div>
     </div>
+    <div class="bootom-container">
+        <form method="post" class="button-container">
+            <button onclick="removeDevice('{{ device.pin }}')">Remove Device</button>
+        </div>
     <div class="overlay" id="overlay">
         <div class="overlay-content">
             <h2>Add Device</h2>
@@ -229,6 +233,12 @@
                 setTimeout(function (){
                     messageContainer.style.border = 'none';    
                 }, 500);
+            }
+        }
+
+        function removeDevice(pin) {
+            if (confirm('Are you sure you want to remove this device?')) {
+                window.location.href = '/unset/'+pin;
             }
         }
 
