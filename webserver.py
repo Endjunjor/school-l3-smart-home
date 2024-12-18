@@ -155,6 +155,24 @@ def catch(all = None):
 def error():
     return render_template('error.html')
 
+#new_device = {
+#        "devicename": devicename,
+#        "pin": pin,
+#        "device_type": device_type
+#    }
+
+@app.route('/groups/switches')
+def set_switches(switches): 
+
+    #write back 2 db
+    return render_template('')
+
+@app.route('')
+def get_switches():
+    #switch_groups = "hole aus db"
+
+    return render_template('')
+
 #--------------------------------------------------------------
 # call_api's
 
