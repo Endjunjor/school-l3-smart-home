@@ -1,3 +1,7 @@
 [
-
+    {
+        "devicename": "test",
+        "pin": 5,
+        "device_type": "output"
+    }
 ]

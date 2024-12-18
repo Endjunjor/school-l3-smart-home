@@ -1,3 +1,3 @@
-import run_on_start as setup
+import webserver
 
-print(setup.generate.token())
+webserver()

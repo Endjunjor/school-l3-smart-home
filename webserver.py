@@ -6,6 +6,7 @@ import json
 import urllib.parse
 import configparser
 import run_on_start as setup2
+import db
 
 app = Flask(__name__)
 
