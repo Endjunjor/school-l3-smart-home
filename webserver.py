@@ -93,11 +93,12 @@ def device(pin):
             device['state'] = LEDC.get.led(pin)
         except:
             device['state'] = False
-        return render_template('device.html', device=device)
+        return render_template('light.html', device=device)
     
     if device['device_type'] == 'input':
-        flash(f'Lol gibt keine Input sachen', 'success')
-        return redirect('/')
+        return render_template('light.html', device=device)
+        #flash(f'Lol gibt keine Input sachen', 'success')
+        #return redirect('/')
 
 @app.route('/switch/<pin>/')
 def device_switch(pin):
@@ -191,7 +192,7 @@ def call_api_device(pin):
     api_id = request.args.get('system_id')
     api_call = get_api(api_id)
     response = call_api(f"get/device/{pin}", api_call)
-    return render_template('device.html', device=response)
+    return render_template('light.html', device=response)
     
 
 @app.route('/api/switch/<pin>/', methods=['GET'])
