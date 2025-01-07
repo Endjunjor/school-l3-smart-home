@@ -1,0 +1,11 @@
+[DEFAULT]
+api_active = "false"
+access_token = " "
+access_url = ""
+port = 5000
+
+[SYSTEM]
+secret_key = "YOUR-SECRET"
+system_id = ""
+connect2api = "false"
+
