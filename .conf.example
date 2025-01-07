@@ -5,6 +5,7 @@ access_url = ""
 port = 5000
 
 [SYSTEM]
-secret_key = ""
+secret_key = "YOUR-SECRET"
 system_id = ""
 connect2api = "false"
+
