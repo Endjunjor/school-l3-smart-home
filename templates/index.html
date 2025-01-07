@@ -189,7 +189,8 @@
     </div>
     <div class="container">
         {% for device in devices %}
-            {% if device.device_type == 'output' %}
+            {{device|pprint}}
+            {% if device.device_type_id == 1 %}
                 <div class="device" onclick="window.location.href='{% if device.access_url%}/api{% endif %}/device/{{ device.pin }}{% if device.access_url%}?url={{device.access_url}}{% endif %}'">
                     <p>{{ device.devicename }}</p>
                     <div class="mini_led {% if device.state %}on{% endif %}"></div>

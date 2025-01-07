@@ -181,7 +181,7 @@
     </div>
     <div class="container">
         <div class="device">
-            {% if device.state == True %}
+            {% if device.state == 1 %}
                 <h2>Device is ON</h2>
                 <div class="switch on" onclick="window.location.href='/switch/{{ device.pin }}'" ></div>
             {% else %}

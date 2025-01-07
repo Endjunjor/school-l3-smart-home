@@ -179,11 +179,12 @@
         {% endwith %}
     </div>
 <div class="light-container" id="light-container">
-	<tr>
-	<th>Quelle</th>	<th>LED Nr.</th>
-	</tr>
-	<tr> <td> available </td> </tr>
-	<tr> <td> added to switch </td> </tr>
+	<tr><th>available</th><th>inserted</th></tr>
+	{% for pin in virt_switch.pins %}
+		<tr>
+			pin
+		</tr>
+	{% endfor %}
 
 </div>
     <div class="container">
@@ -210,7 +211,7 @@
                     <option value="" disabled selected>Select Device Type</option>
                     <option value="output">Light</option>
                     <option value="input">Switch</option>
-              	<option value="multi-input">Virtueller Switch</option>
+             	    <option value="multi-input">Virtueller Switch</option>
 		</select>
                 <br>
                 <button type="submit">Confirm</button>

@@ -75,9 +75,8 @@ db.init_tables()
 #  loacal functions
 @app.route('/')
 def home():
-    devices = FA.get_devices()
-    for device in devices:
-        device['state'] = LEDC.get.led(int(device['pin']))
+    devices = db.get_all_devices()
+    print(devices);
 
     if config['SYSTEM']['connect2api'].strip('"') == "true":
         for response in call_all_apis("json"):
@@ -88,31 +87,33 @@ def home():
 @app.route('/device/<pin>/')
 def device(pin):
     pin = int(pin)
-    device = FA.get_device(pin)
+    device = db.get_device(pin)
     if device is None:
         return redirect(url_for('error'))
     try:
-        device['state'] = LEDC.get.led(pin)
+        state = int(device["state"])
     except:
-        device['state'] = False
+        db.update_device_state_by_pin(pin, 0)
     return render_template('device.html', device=device)
 
 @app.route('/switch/<pin>/')
 def device_switch(pin):
     pin = int(pin)
-    device = FA.get_device(pin)
+    device = db.get_device(pin)
     if device is None:
         return redirect(url_for('error'))
     LEDC.set.switch(pin)
+    state = LEDC.get.led(pin)
+    db.update_device_state_by_pin(pin, state)
     return redirect(f'/device/{pin}')
 
 @app.route('/unset/<pin>/')
 def unset_pin(pin):
     pin = int(pin)
-    device = FA.get_device(pin)
+    device = db.get_device(pin)
     if device is None:
         return redirect(url_for('error'))
-    FA.remove(pin)
+    db.remove_device(pin)
     LEDC.clear_led(pin)
     
     flash(f'Pin "{pin}" is now unset and cleand.', 'success')
@@ -123,8 +124,9 @@ def add_device():
     device_name = request.form.get('deviceName')
     pin = int(request.form.get('pin'))
     device_type = request.form.get('deviceType')
-    if FA.check_pin(pin) == False:
-        FA.add_device(device_name, pin, device_type)
+    room_id = int(request.form.get('roomID'))
+    if not db.get_device(pin):
+        db.add_device(device_name, pin, device_type, )
     else:
         flash(f'Error: Pin "{pin}" is already in use.', 'error')
         return redirect(url_for('home'))
@@ -134,7 +136,7 @@ def add_device():
                 flash(f'Device "{device_name}" added successfully.', 'success')
                 pass
             else:
-                FA.remove(pin)
+                db.remove_device(pin)
                 flash(f'Error by pin setup "{device_name}" are not created.', 'error')
         elif device_type == 'input':
             LEDC.setup_button(pin)

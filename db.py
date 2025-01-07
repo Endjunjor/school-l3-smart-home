@@ -10,8 +10,15 @@ class DBWrapper:
         self.connection = None
         self.cur = None
 
+    def dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
     def create_db(self):
-        self.connection = sqlite3.connect(self.db_name)
+        self.connection = sqlite3.connect(self.db_name,check_same_thread=False)
+        self.connection.row_factory = self.dict_factory
         self.cur = self.connection.cursor()
         return self.cur
 
@@ -41,6 +48,7 @@ class DBWrapper:
                 pin INTEGER NOT NULL UNIQUE,
                 device_type_id INTEGER NOT NULL,
                 roomID INTEGER,
+                state INTEGER,
                 FOREIGN KEY(device_type_id) REFERENCES device_type(id)
             );
         """)
@@ -68,16 +76,16 @@ class DBWrapper:
         self.connection.commit()
 
     def add_device(self, device_name: str, pin: int, device_type: int, room_id = 0):
-        device_type_exists = self.cur.execute("""
-            SELECT id FROM device_type WHERE id = ?;
+        device_type = self.cur.execute("""
+            SELECT id FROM device_type WHERE device_type = ?;
         """, (device_type,)).fetchone()
-        if not device_type_exists:
-            raise DeviceTypeNotFoundException(f"Device type {device_type} not found")
+        if not device_type:
+            raise DeviceTypeNotFoundException(f"Device type {device_type['device_type']} not found")
         try:
             self.cur.execute("""
                 INSERT INTO device (devicename, pin, device_type_id, roomID)
                 VALUES (?, ?, ?, ?);
-            """, (device_name, pin, device_type, room_id))
+            """, (device_name, pin, device_type["id"], room_id))
         except sqlite3.IntegrityError:
             return False
         self.write_log("info", "device_added", f"Successfully added device {device_name} of type {device_type} on pin {pin}")
@@ -101,6 +109,7 @@ class DBWrapper:
         device = self.cur.execute("""
         SELECT * FROM device WHERE pin = ?;
         """, (pin,)).fetchone()
+        
         return device
     
     def get_all_devices(self):
@@ -115,6 +124,14 @@ class DBWrapper:
         """, (room_id,)).fetchall()
 
         return all_devices_for_room
+
+    def update_device_state_by_pin(self, pin: int, state: int):
+        update = self.cur.execute("""
+        UPDATE device SET state = ? WHERE pin = ?;
+        """, (state,pin, ))
+        self.write_log("INFO", 200 , f"Updated state on pin {pin} to {state}" )
+        self.connection.commit()
+
 
     def close(self):
         if self.connection:
