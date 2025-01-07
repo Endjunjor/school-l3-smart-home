@@ -96,7 +96,7 @@ def device(pin):
         return render_template('light.html', device=device)
     
     if device['device_type'] == 'input':
-        return render_template('light.html', device=device)
+        return render_template('button.html', device=device)
         #flash(f'Lol gibt keine Input sachen', 'success')
         #return redirect('/')
 

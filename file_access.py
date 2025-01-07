@@ -68,11 +68,19 @@ def add_device(devicename, pin, device_type):
         return False
 
     # Create a new device dictionary
-    new_device = {
-        "devicename": devicename,
-        "pin": pin,
-        "device_type": device_type
-    }
+    if device_type == "input":
+        new_device = {
+            "name": devicename,
+            "pin": pin,
+            "type": device_type,
+            "function": 0
+        }
+    else:
+        new_device = {
+            "name": devicename,
+            "pin": pin,
+            "type": device_type
+        }
 
     # Add the new device to the list
     devices.append(new_device)

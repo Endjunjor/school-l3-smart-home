@@ -180,18 +180,21 @@
         {% endwith %}
     </div>
     <div class="container">
-        <input type="radio" id="btn_click">
-        <label for="btn_click" class="btn_click">
-            Hallo
-        </label>
-        <input type="radio" id="btn_revers_click">
-        <label for="btn_revers_click" class="btn_revers_click">
-            Hallo
-        </label>
-        <input type="radio" id="btn_switch">
-        <label for="btn_switch" class="btn_switch">
-            Hallo
-        </label>
+        <form method="post" class="btn_click" action="/set_btn/{{ device.pin }}">
+            <input type="radio" id="btn_click" name="btn_type" {% if device.function == 0 %} checked {% endif %}>
+            <label for="btn_click" class="btn_click">
+                Umschalt Schalter
+            </label>
+            <input type="radio" id="btn_revers_click" name="btn_type" {% if device.function == 1 %} checked {% endif %}>
+            <label for="btn_revers_click" class="btn_revers_click">
+                Druck Schalter
+            </label>
+            <input type="radio" id="btn_switch" name="btn_type" {% if device.function == 2 %} checked {% endif %}>
+            <label for="btn_switch" class="btn_switch">
+                Umgekerter Druck Schalter
+            </label>
+            <button type="submit">Speichern</button>
+        </form>
     </div>
     <div class="bootom-container">
         <form method="post" class="button-container">
