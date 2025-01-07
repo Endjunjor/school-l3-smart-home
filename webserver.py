@@ -6,7 +6,7 @@ import json
 import urllib.parse
 import configparser
 import run_on_start as setup2
-import db
+from db import DBWrapper
 
 app = Flask(__name__)
 
@@ -67,6 +67,10 @@ def get_api(api_id):
         if api['system_id'] == api_id:
             return api
     return "[{ 'response': 'error'}]"
+
+db = DBWrapper("c2c1.db")
+db.init_db()
+db.init_tables()
 
 #  loacal functions
 @app.route('/')
