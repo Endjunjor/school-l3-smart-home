@@ -54,6 +54,15 @@ with open('.conf', 'w') as configfile:
     config.write(configfile)
 
 
+def switch(pin):
+    device = db.get_device(pin)
+    if device is None:
+        return redirect(url_for('error'))
+    LEDC.set.switch(pin)
+    state = LEDC.get.led(pin)
+    db.update_device_state_by_pin(pin, state)
+
+
 def call_api_info():
     for api in api_list:
         print()
@@ -76,13 +85,14 @@ db.init_tables()
 @app.route('/')
 def home():
     devices = db.get_all_devices()
-    print(devices);
+    num_rooms = db.get_number_of_rooms()
+    grouped_devices = db.get_all_devices_grouped_by_room()
 
     if config['SYSTEM']['connect2api'].strip('"') == "true":
         for response in call_all_apis("json"):
             devices += response
 
-    return render_template('index.html', devices=devices)
+    return render_template('index.html', devices_by_room=grouped_devices)
 
 @app.route('/device/<pin>/')
 def device(pin):
@@ -99,12 +109,7 @@ def device(pin):
 @app.route('/switch/<pin>/')
 def device_switch(pin):
     pin = int(pin)
-    device = db.get_device(pin)
-    if device is None:
-        return redirect(url_for('error'))
-    LEDC.set.switch(pin)
-    state = LEDC.get.led(pin)
-    db.update_device_state_by_pin(pin, state)
+    switch(pin)
     return redirect(f'/device/{pin}')
 
 @app.route('/unset/<pin>/')
@@ -124,9 +129,9 @@ def add_device():
     device_name = request.form.get('deviceName')
     pin = int(request.form.get('pin'))
     device_type = request.form.get('deviceType')
-    room_id = int(request.form.get('roomID'))
+    roomID = int(request.form.get('roomID'))
     if not db.get_device(pin):
-        db.add_device(device_name, pin, device_type, )
+        db.add_device(device_name, pin, device_type, roomID)
     else:
         flash(f'Error: Pin "{pin}" is already in use.', 'error')
         return redirect(url_for('home'))
@@ -146,6 +151,16 @@ def add_device():
         flash(f'Error "{device_name}" are not created.', 'error')
 
     return redirect("/")
+
+@app.route("/room/<roomID>")
+def room_toggle(roomID):
+    roomID = int(roomID)
+    devices_in_room = db.get_all_devices_for_room(roomID)
+    for device in devices_in_room:
+        switch(int(device['pin']))
+    
+    return redirect("/")
+
 
 @app.route('/<all>')
 def catch(all = None):

@@ -124,6 +124,22 @@ class DBWrapper:
         """, (room_id,)).fetchall()
 
         return all_devices_for_room
+    
+    def get_all_devices_grouped_by_room(self):
+        all_devices = self.cur.execute("""
+        SELECT * FROM device ORDER BY roomID DESC;
+        """).fetchall()
+
+        grouped_devices = {}
+
+        for device in all_devices:
+            roomID = device["roomID"]
+            if roomID not in grouped_devices:
+                grouped_devices[roomID] = []
+            grouped_devices[roomID].append(device)
+        
+        return grouped_devices
+
 
     def update_device_state_by_pin(self, pin: int, state: int):
         update = self.cur.execute("""
@@ -132,6 +148,11 @@ class DBWrapper:
         self.write_log("INFO", 200 , f"Updated state on pin {pin} to {state}" )
         self.connection.commit()
 
+    def get_number_of_rooms(self):
+        result = self.cur.execute("""
+        SELECT DISTINCT roomID FROM device;
+        """).fetchall()
+        return result
 
     def close(self):
         if self.connection:
