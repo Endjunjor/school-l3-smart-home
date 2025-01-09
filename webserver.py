@@ -53,6 +53,8 @@ access_url = urllib.parse.quote(access_url)
 with open('.conf', 'w') as configfile:
     config.write(configfile)
 
+def create_record(deviceID, state):
+    db.create_record(deviceID, state)
 
 def switch(pin):
     device = db.get_device(pin)
@@ -61,7 +63,7 @@ def switch(pin):
     LEDC.set.switch(pin)
     state = LEDC.get.led(pin)
     db.update_device_state_by_pin(pin, state)
-
+    create_record(int(device["id"]), state)
 
 def call_api_info():
     for api in api_list:
@@ -77,7 +79,7 @@ def get_api(api_id):
             return api
     return "[{ 'response': 'error'}]"
 
-db = DBWrapper("c2c1.db")
+db = DBWrapper(config["DEFAULT"]["db_name"])
 db.init_db()
 db.init_tables()
 
@@ -160,6 +162,12 @@ def room_toggle(roomID):
         switch(int(device['pin']))
     
     return redirect("/")
+
+@app.route('/stats')
+def stats():
+    stats = db.get_num_state_updates()
+    history = db.get_history()
+    return render_template("stats.html", stats=stats, history_by_minute=history)
 
 
 @app.route('/<all>')

@@ -1,5 +1,5 @@
 import sqlite3
-import os.path
+from collections import defaultdict
 import time as t
 
 from exceptions import DBExistsException, DeviceTypeNotFoundException, DeviceNotFoundException
@@ -15,6 +15,13 @@ class DBWrapper:
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
+
+    def group_by_minute(self, data):
+        history_by_minute = defaultdict(list)
+        for row in data:
+            minute = row["minute_group"]
+            history_by_minute[minute].append(row)
+        return dict(history_by_minute)
 
     def create_db(self):
         self.connection = sqlite3.connect(self.db_name,check_same_thread=False)
@@ -35,6 +42,17 @@ class DBWrapper:
                 FOREIGN KEY(deviceID) REFERENCES device(id)
             );
         """)
+
+        self.cur.execute("""
+            CREATE TABLE IF NOT EXISTS history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                deviceID INTEGER,
+                state INTEGER,
+                FOREIGN KEY(deviceID) REFERENCES device(id)
+            );
+        """)
+
         self.cur.execute("""
             CREATE TABLE IF NOT EXISTS device_type (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -153,6 +171,39 @@ class DBWrapper:
         SELECT DISTINCT roomID FROM device;
         """).fetchall()
         return result
+    
+    def create_record(self, deviceID, state):
+        self.cur.execute("""
+            INSERT INTO history (deviceID, state) VALUES (?, ?)
+        """, (deviceID, state, ))
+
+        self.connection.commit()
+        return True
+    
+    def get_num_state_updates(self):
+        num_updates = self.cur.execute("""
+            SELECT COUNT(deviceID) FROM history;
+        """)
+        return num_updates
+    def get_history(self):
+        history_entries = self.cur.execute("""
+            SELECT 
+                strftime('%Y-%m-%d %H:%M', history.timestamp) AS minute_group,
+                device.devicename,
+                device.id AS device_id,
+                device.roomID,
+                history.state
+            FROM 
+                history
+            JOIN 
+                device ON history.deviceID = device.id
+            GROUP BY 
+                minute_group, device.id
+            ORDER BY 
+                minute_group DESC;
+        """)
+        grouped_data = self.group_by_minute(history_entries)
+        return grouped_data
 
     def close(self):
         if self.connection:
